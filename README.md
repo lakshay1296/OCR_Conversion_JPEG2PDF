@@ -11,11 +11,11 @@ I'm currently trying to make ***ocrmypdf*** on windows as it shows error in **le
 ## Requirements
 Make sure to install libraries in the same manner
 
--libjpeg : libpng : libtiff : zlib : libwebp : libopenjp2
--leptonica (v1.78) (you can use any version but you would need to change the location of liblept.so location in the code)
--Tesseract (any version)
--Tesseract Language Data (big tessdata)
--ocrmypdf library
+- libjpeg : libpng : libtiff : zlib : libwebp : libopenjp2
+- leptonica (v1.78) (you can use any version but you would need to change the location of liblept.so location in the code)
+- Tesseract (any version)
+- Tesseract Language Data (big tessdata)
+- ocrmypdf library
 
 ## Workflow
 - You need to provide the converted JPEG's of PDF's to the code
