@@ -8,6 +8,15 @@ On the other hand, reading a **JPEG** is still possible with **libgif 5.1.4 : li
 
 I'm currently trying to make ***ocrmypdf*** on windows as it shows error in **leptonica.py** about the dll. It's not impossible to do, if anyone finds a way, you can make changes in the repository in a new branch.
 
+##Requirements
+Make sure to install libraries in the same manner
+
+-libjpeg : libpng : libtiff : zlib : libwebp : libopenjp2
+-leptonica (v1.78) (you can use any version but you would need to change the location of liblept.so location in the code)
+-Tesseract (any version)
+-Tesseract Language Data (big tessdata)
+-ocrmypdf library
+
 ## Workflow
 - You need to provide the converted JPEG's of PDF's to the code
 - Naming convention for JPEG: ***PDFname_count*** (if you want to change, make changes in the ReGex too)
