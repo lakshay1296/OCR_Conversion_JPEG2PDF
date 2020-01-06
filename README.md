@@ -8,7 +8,7 @@ On the other hand, reading a **JPEG** is still possible with **libgif 5.1.4 : li
 
 I'm currently trying to make ***ocrmypdf*** on windows as it shows error in **leptonica.py** about the dll. It's not impossible to do, if anyone finds a way, you can make changes in the repository in a new branch.
 
-##Requirements
+## Requirements
 Make sure to install libraries in the same manner
 
 -libjpeg : libpng : libtiff : zlib : libwebp : libopenjp2
