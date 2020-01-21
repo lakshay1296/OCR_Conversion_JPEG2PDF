@@ -13,19 +13,22 @@ import os
 ----------------------------------------------------------------'''
 
 def pdf2img():
+    count = 1
+    for root, dir, files in os.walk("C:\\Users\lakshay.saini\Documents\TEST\PDFs", topdown=True):
+        for pdf_file in files:
+            if "Martin Renteria-page299.pdf" in pdf_file:
 
-    for root, dir, files in os.walk("C:\\Users\lakshay.saini\Desktop\Med Legal\PDF\PDF"):
-        for file in files:
+                # Putting "\bin" path in poppler_path helps in locating executable file
+                pages = convert_from_path(root + "/" + pdf_file, 300, poppler_path="C:\\Users\lakshay.saini\PycharmProjects\OCR_Conversion_JPEG2PDF\poppler-0.68.0\\bin")
 
-            # Putting "\bin" path in poppler_path helps in locating executable file
-            pages = convert_from_path(root + "/" + file, 300, poppler_path="C:\\Users\lakshay.saini\PycharmProjects\OCR_Conversion_JPEG2PDF\poppler-0.68.0\\bin")
-            count = 1
-            for page in pages:
+                for page in pages:
 
-                page.save(root + "/image/" + file.replace(".pdf", "_" + str(count) + ".jpeg"), "JPEG")
-                count = count + 1
+                    page.save(root + "/image/" + pdf_file.replace(".pdf", "_" + str(count) + ".jpeg"), "JPEG")
+                    count = count + 1
 
-            print (file)
+                    print ("Converted ") + str(count) + "Page"
+
+                print (pdf_file)
 
 def image_tweak():
     # C:\Users\lakshay.saini\Desktop\Med Legal\PDF\PDF\image
@@ -44,4 +47,5 @@ def image_tweak():
 
 if __name__ == '__main__':
 
-    image_tweak()
+    # image_tweak()
+    pdf2img()

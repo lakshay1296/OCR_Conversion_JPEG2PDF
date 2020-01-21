@@ -25,8 +25,8 @@ path = input("Enter folder path containing images: ")
 # except Exception:
 #     pass
 
-df = pd.read_csv("C:\\Users\lakshay.saini\Desktop\LIVE\image\Listing.csv")
-df1 = pd.read_csv("C:\\Users\lakshay.saini\Desktop\LIVE\PDF_Listing.csv")
+df = pd.read_csv("C:\\Users\lakshay.saini\Documents\TEST\PDF_Name_Listing.csv")
+df1 = pd.read_csv("C:\\Users\lakshay.saini\Documents\TEST\PDF_Page_Listing.csv")
 
 def extract_list():
     f = open("C:\\Users\lakshay.saini\Desktop\LIVE\Listing.csv", "w+", newline="")
@@ -34,16 +34,16 @@ def extract_list():
     w.writerow(["File Name"])
 
     # Keep the directory files in an alphabetical order
+    # topdown parameter does not do anything
+    # we can't use os.walk to get path alphabetical or in any other order
     for root, dir, files in os.walk("C:\\Users\lakshay.saini\Documents\image", topdown=True):
         for file in files:
             if file.lower().endswith(".jpeg"):
                 w.writerow([str(file)])
 
-
+''' OCR Code '''
 def perform_ocr(oem_mode=None, psm_mode=None):
-
-    ''' OCR Code '''
-    for root, dir, files in os.walk(path):
+    for root, dir, files in os.walk(path, topdown=True):
         for jpeg in files:
             if jpeg.lower().endswith(".jpeg"):
                 inputFile = root + "/" + jpeg
@@ -64,7 +64,8 @@ def pdf_merge():
                 root = df1["Root"][i]
 
                 ''' Extracting Parent Name '''
-                matchObj = re.match("(.*)_.*.pdf", pdf, re.I | re.M)
+                # matchObj = re.match("(.*)_.*.pdf", pdf, re.I | re.M)
+                matchObj = re.match("(.*)-.*.pdf", pdf, re.I | re.M)
                 if matchObj:
                     file_name = matchObj.group(1)
                     print(file_name)
@@ -75,7 +76,7 @@ def pdf_merge():
                 if pdf.lower().endswith(".pdf") and (file_name == fileName):
 
                     ''' Code for merging PDF '''
-                    pdf_reader = PdfFileReader(root + "/" + pdf)
+                    pdf_reader = PdfFileReader(root + pdf)
                     for page in range(pdf_reader.getNumPages()):
                         pdf_writer.addPage(pdf_reader.getPage(page))
 
@@ -83,3 +84,7 @@ def pdf_merge():
                         pdf_writer.write(fh)
                 print (fileName + " PDF has been created")
 
+if __name__ == '__main__':
+    # perform_ocr(None, None)
+    # extract_list()
+    pdf_merge()
