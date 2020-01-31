@@ -1,8 +1,8 @@
-'''------------------------------------------------------------------------
+"""------------------------------------------------------------------------
 
     Put "your path\poppler-0.68.0\bin" location to the environment variable
 
-------------------------------------------------------------------------'''
+------------------------------------------------------------------------"""
 
 from pdf2image import convert_from_path
 import cv2
@@ -12,18 +12,50 @@ import csv
 from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
 import pandas as pd
 
-def perform_ocr(path=None, oem_mode=None, psm_mode=None):
-    # for root, dir, files in os.walk(path, topdown=True):
-    #     for jpeg in files:
+""" Check if PDF is encrypted or not. """
+
+
+def check_pdf_encryption(pdf_path):
+    pdf_reader = PdfFileReader(open(pdf_path, "rb"))
+
+    if pdf_reader.isEncrypted:
+        return True
+
+    else:
+        return False
+
+
+""" Check if PDF's pages are scanned or readable. """
+
+
+def is_readable(pdf):
+    pdf_reader = PdfFileReader(open(pdf, "rb"))
+    # pdf_reader.getNumPages()
+    for page in range(pdf_reader.getNumPages()):
+        page_data = pdf_reader.getPage(page)
+        if "/Font" in page_data["/Resources"]:
+            print("[Info]: Looks like there is text in the PDF, contains:", page_data['/Resources'].keys())
+            print("Page: " + str(page) + " contains text")
+            print(page_data.get("/Rotate"))
+
+        else:
+            print("Page: " + str(page) + " does not contain text")
+            print(page_data.get("/Rotate"))
+
+
+''' Performing OCR using Tesseract '''
+
+
+def perform_ocr(path=None):
     if path.lower().endswith(".jpeg"):
         inputFile = path
         outputFile = path.replace(".jpeg", "")
+
         os.system('tesseract --psm 6 "' + inputFile + '" "' + outputFile + '" pdf')
         # os.system('tesseract "' + inputFile + '" "' + outputFile + '" --oem 1 --psm 6 pdf')
 
 
 def pdf2img(pdf_location, poppler_path):
-
     for root, dir, files in os.walk(pdf_location):
         for pdf_file in files:
             if ".pdf" in pdf_file:
@@ -46,7 +78,7 @@ def pdf2img(pdf_location, poppler_path):
 
                     perform_ocr(path=jpeg_path)
 
-                    os.remove(jpeg_path)
+                    # os.remove(jpeg_path)
 
                     ''' pdf merge '''
 
@@ -57,7 +89,7 @@ def pdf2img(pdf_location, poppler_path):
                     for page in range(pdf_reader.getNumPages()):
                         pdf_writer.addPage(pdf_reader.getPage(page))
 
-                    print ("Ocr'd " + str(count) + " Page")
+                    print("Ocr'd " + str(count) + " Page")
                     count = count + 1
 
                     with open(ocr_path, 'wb') as fh:
@@ -71,6 +103,8 @@ def pdf2img(pdf_location, poppler_path):
 
 
 if __name__ == '__main__':
+    # C:\Users\lakshay.saini\Desktop\OCR Folder
     pdf_loc = input("Enter PDF Location: ")
     poppler_path = "C:\\Users\lakshay.saini\PycharmProjects\OCR_Conversion_JPEG2PDF\poppler-0.68.0\\bin"
-    pdf2img(pdf_loc, poppler_path)
+    is_readable(pdf_loc)
+    # pdf2img(pdf_loc, poppler_path)
