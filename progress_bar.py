@@ -29,7 +29,7 @@ class Main(object):
         check_pdf = tk.Checkbutton(self.master, text="PDF", variable=select_pdf)
         check_pdf.pack()
 
-        print(check_pdf.tk.getint())
+        # print(check_pdf.tk.getint())
 
     def start_thread(self):
         self.t = Thread(target=self.add_bar)
