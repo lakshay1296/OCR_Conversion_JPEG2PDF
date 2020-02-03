@@ -6,20 +6,18 @@
 
 from tkinter import *
 from tkinter.filedialog import askopenfilename
-from tkinter.ttk import Progressbar
 from tkinter import ttk
+from threading import Thread
+from Combined import perform_ocr
 import time
 
-
-def functionality():
-    pass
-
+filename=""
 
 def fileopen():
     # withdraws the master window
     # master.withdraw()
     filename = askopenfilename()
-    print(filename)
+    # print(filename)
 
 
 def menu_bar(master):
@@ -36,14 +34,27 @@ def check_buttons(check_list):
         print(i.get())
 
 
+def add_bar(master):
+    var = IntVar()
+    var.set(0)
+
+    progessbar = ttk.Progressbar(master, variable=var, orient=HORIZONTAL, length=200).grid()
+
+    for x in range(10):
+        time.sleep(2.0)
+        var.set(x)
+
+
+def start_thread(master):
+    t = Thread(target=lambda: add_bar(master))
+    t.start()
+
 def window(master):
     """ Main Window """
 
     check_list = []
 
     menu_bar(master)
-
-    """ Start Frame to hold widgets """
 
     Label(master, text="Tesseract Powered OCR", bg="white", height=2, width=40) \
         .grid(row=0, sticky=NW, padx=10, pady=5)
@@ -66,6 +77,10 @@ def window(master):
     # Button for submitting options
     submit = Button(master, text="Submit", command=lambda: check_buttons(check_list)) \
         .grid(sticky=NW, padx=15, pady=10, row=3)
+
+    # Button which activates the progress bar
+    add_bar = Button(master, text="Add Bar", command=lambda: start_thread(master), bd=1, relief=SOLID)\
+        .grid()
 
 
 if __name__ == '__main__':
