@@ -11,13 +11,13 @@ from threading import Thread
 from Combined import perform_ocr
 import time
 
-filename=""
 
-def fileopen():
+def fileopen(master):
     # withdraws the master window
     # master.withdraw()
     filename = askopenfilename()
-    # print(filename)
+    print(filename)
+    # Entry(master, text="Test").grid(padx=0, pady=55, row=2)
 
 
 def menu_bar(master):
@@ -29,9 +29,21 @@ def menu_bar(master):
     fileMenu.add_command(label="Exit", command=master.quit)
 
 
-def check_buttons(check_list):
-    for i in check_list:
-        print(i.get())
+def submit(var_list):
+    # list is [pdf, ocr, psm mode]
+    # for i in check_list:
+    #     print(i.get())
+    print("Submit waala: ", filename)
+
+    psm_mode = "--psm " + str(var_list[2])
+
+    # PDF Conversion
+    if var_list[0] is True:
+        pass
+
+    # HOCR Conversion
+    if var_list[1] is True:
+        pass
 
 
 def add_bar(master):
@@ -49,41 +61,49 @@ def start_thread(master):
     t = Thread(target=lambda: add_bar(master))
     t.start()
 
+
 def window(master):
     """ Main Window """
 
-    check_list = []
+    var_list = []
 
     menu_bar(master)
 
     Label(master, text="Tesseract Powered OCR", bg="white", height=2, width=40) \
         .grid(row=0, sticky=NW, padx=10, pady=5)
 
-    select_pdf = IntVar()
+    select_pdf = BooleanVar()
     pdf = Checkbutton(master, text=" PDF", variable=select_pdf) \
-        .grid(sticky=NW, padx=15, pady=15, row=1, column=0)
+        .grid(sticky=NW, padx=15)
 
-    select_hocr = IntVar()
+    select_hocr = BooleanVar()
     hocr = Checkbutton(master, text=" hOCR", variable=select_hocr) \
-        .grid(sticky=NW, padx=100, pady=15, row=1)
+        .grid(sticky=NE, padx=15, row=1)
 
-    check_list.append(select_pdf)
-    check_list.append(select_hocr)
+    var_list.append(select_pdf)
+    var_list.append(select_hocr)
+
+    combo = ttk.Combobox(master)
+    combo["values"] = ("Select PSM mode", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+    combo.current(0)
+    combo.grid(sticky=NW, padx=15, pady=5)
+    var_list.append(combo)
 
     # Button for opening files
-    file_open = Button(master, text="Select File Location", command=lambda: fileopen()) \
-        .grid(sticky=NW, padx=15, pady=25, row=2)
+    file_open = Button(master, text="Select File Location", command=lambda: fileopen(master)) \
+        .grid(sticky=NW, padx=15, pady=5)
 
     # Button for submitting options
-    submit = Button(master, text="Submit", command=lambda: check_buttons(check_list)) \
-        .grid(sticky=NW, padx=15, pady=10, row=3)
+    submit_button = Button(master, text="Submit", command=lambda: submit(var_list)) \
+        .grid(sticky=NW, padx=15, pady=5)
 
     # Button which activates the progress bar
-    add_bar = Button(master, text="Add Bar", command=lambda: start_thread(master), bd=1, relief=SOLID)\
+    add_bar = Button(master, text="Add Bar", command=lambda: start_thread(master), bd=1, relief=SOLID) \
         .grid()
 
 
 if __name__ == '__main__':
+    filename = ""
     root_app = Tk()
     root_app.title("Tesseract powered OCR")
     # Set constant app size

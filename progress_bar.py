@@ -3,7 +3,9 @@ import tkinter as tk
 from threading import Thread
 import time
 
+
 class Main(object):
+
     def __init__(self, master):
         self.master = master
 
