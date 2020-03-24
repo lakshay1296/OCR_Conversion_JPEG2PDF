@@ -10,6 +10,7 @@ from tkinter import messagebox
 from tkinter import filedialog
 from threading import Thread
 from Combined import perform_ocr
+from PDF_Split import split
 from PyPDF2 import PdfFileReader, PdfFileWriter
 from pdf2image import convert_from_path
 import time
@@ -46,7 +47,7 @@ class window(object):
         var_list.append(select_text)
 
         combo = ttk.Combobox(self.master)
-        combo["values"] = ("Select PSM mode", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+        combo["values"] = ("Select PSM mode", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
         combo.current(0)
         combo.grid(sticky=NW, padx=15, pady=5, row=2)
         var_list.append(combo)
@@ -236,7 +237,8 @@ class window(object):
         print (self.commands)
 
         if self.function == "Initiated fileopen":
-            t = Thread(target=lambda: self.ocr_code_singleFile(pdf_location=self.filename, var_list=var_list, command=self.commands))
+            t = Thread(target=lambda: self.ocr_code_singleFile(pdf_location=self.filename, var_list=var_list,
+                                                               command=self.commands))
             t.start()
 
         elif self.function == "Initiated folderopen":
@@ -258,86 +260,101 @@ class window(object):
 
         path = pdf_location
 
-        # For getting file page count
-        # pdf = PdfFileReader(open(pdf_location, 'rb'))
-        # page_count = pdf.getNumPages()
+        #For getting file page count
+        pdf = PdfFileReader(open(pdf_location, 'rb'))
+        page_count = pdf.getNumPages()
 
-        page_count = 171
+        if page_count < 150:
 
-        print("Pages count is: ", page_count)
+            # page_count = 171
 
-        # For getting file name
-        path_list = path.split("/")
-        pdf_file = path_list[len(path_list) - 1]
+            print("Pages count is: ", page_count)
 
-        # For storing txt conversion path
-        ocr_path = path.replace(".pdf", "_ocr.pdf")
-        ocr_txt_path = path.replace(".pdf", "_ocr.txt")
+            # For getting file name
+            path_list = path.split("/")
+            pdf_file = path_list[len(path_list) - 1]
 
-        if " txt" in self.commands:
-            txt = open(ocr_txt_path, "wb")
-        else:
-            txt = None
+            # For storing txt conversion path
+            if ".pdf" in path:
+                ocr_path = path.replace(".pdf", "_ocr.pdf")
+                ocr_txt_path = path.replace(".pdf", "_ocr.txt")
 
-        # Initializing PDF Writer
-        pdf_writer = PdfFileWriter()
+            else:
+                ocr_path = path.replace(".PDF", "_ocr.pdf")
+                ocr_txt_path = path.replace(".PDF", "_ocr.txt")
 
-        # Putting "\bin" path in poppler_path helps in locating executable file
-        pages = convert_from_path(path, 300, poppler_path=poppler_path)
-
-        count = 1
-        for page in pages:
-            # page.save(root + pdf_file.replace(".pdf", "_" + str(count) + ".jpeg"), "JPEG")
-
-            jpeg_path = path.replace(".pdf", "_.jpeg")
-            page.save(jpeg_path, "JPEG")
-
-            perform_ocr(path=jpeg_path, command=command)
-
-            os.remove(jpeg_path)
-
-            """ PDF File Generation """
-            if " pdf" in self.commands:
-
-                pdf_path = jpeg_path.replace(".jpeg", ".pdf")
-
-                pdf_obj = open(pdf_path, "rb")
-                pdf_reader = PdfFileReader(pdf_obj)
-
-                for page in range(pdf_reader.getNumPages()):
-                    pdf_writer.addPage(pdf_reader.getPage(page))
-
-                print("Ocr'd " + str(count) + " Page")
-
-                with open(ocr_path, 'wb') as fh:
-                    pdf_writer.write(fh)
-
-                pdf_obj.close()
-                os.remove(pdf_path)
-
-            """ Text File Generation """
             if " txt" in self.commands:
-                txt_path = jpeg_path.replace(".jpeg", ".txt")
-                txt_obj = open(txt_path, "rb")
+                txt = open(ocr_txt_path, "wb")
+            else:
+                txt = None
 
-                content = txt_obj.read()
-                if txt is not None:
-                    txt.write(content)
+            # Initializing PDF Writer
+            pdf_writer = PdfFileWriter()
 
-                txt_obj.close()
-                os.remove(txt_path)
+            # Putting "\bin" path in poppler_path helps in locating executable file
+            pages = convert_from_path(path, 300, poppler_path=poppler_path)
 
-            # For calculating the OCR Progress
-            x = (count / page_count) * 100
-            percentage = round(x)
-            var.set(percentage)
-            # time.sleep(5.0)
-            count = count + 1
+            count = 1
+            for page in pages:
+                # page.save(root + pdf_file.replace(".pdf", "_" + str(count) + ".jpeg"), "JPEG")
 
-        if txt is not None:
-            txt.close()
-        print("OCR'd " + pdf_file + " successfully.")
-        messagebox.showinfo(title="OCR Complete", message=pdf_file + " has been OCR'd")
+                if ".pdf" in path:
+                    jpeg_path = path.replace(".pdf", "_.jpeg")
+                else:
+                    jpeg_path = path.replace(".PDF", "_.jpeg")
+
+                page.save(jpeg_path, "JPEG")
+
+                perform_ocr(path=jpeg_path, command=command)
+
+                os.remove(jpeg_path)
+
+                """ PDF File Generation """
+                if " pdf" in self.commands:
+
+                    pdf_path = jpeg_path.replace(".jpeg", ".pdf")
+
+                    pdf_obj = open(pdf_path, "rb")
+                    pdf_reader = PdfFileReader(pdf_obj)
+
+                    for page in range(pdf_reader.getNumPages()):
+                        pdf_writer.addPage(pdf_reader.getPage(page))
+
+                    print("Ocr'd " + str(count) + " Page")
+
+                    with open(ocr_path, 'wb') as fh:
+                        pdf_writer.write(fh)
+
+                    pdf_obj.close()
+                    os.remove(pdf_path)
+
+                """ Text File Generation """
+                if " txt" in self.commands:
+                    txt_path = jpeg_path.replace(".jpeg", ".txt")
+                    txt_obj = open(txt_path, "rb")
+
+                    content = txt_obj.read()
+                    if txt is not None:
+                        txt.write(content)
+
+                    txt_obj.close()
+                    os.remove(txt_path)
+
+                # For calculating the OCR Progress
+                x = (count / page_count) * 100
+                percentage = round(x)
+                var.set(percentage)
+                # time.sleep(5.0)
+                count = count + 1
+
+            if txt is not None:
+                txt.close()
+            print("OCR'd " + pdf_file + " successfully.")
+            messagebox.showinfo(title="OCR Complete", message=pdf_file + " has been OCR'd")
+
+        else:
+            split(pdf_location, page_num=page_count)
+            print("PDF has been split into halves.")
 
 
     def ocr_code_multiFile(self, pdf_location,
@@ -363,95 +380,118 @@ class window(object):
 
         for root, dir, files in os.walk(pdf_location):
             for pdf_file in files:
-                if ".pdf" in pdf_file:
+                if ".pdf" in pdf_file.lower():
                     file_count_list.append(pdf_file)
         file_count = len(file_count_list)
 
         file_process = 1
         for root, dir, files in os.walk(pdf_location):
             for pdf_file in files:
-                if ".pdf" in pdf_file:
+                if ".pdf" in pdf_file.lower():
 
                     # labelVar.set("Files Progress: "+pdf_file+ " Completed.")
                     label1["text"] = "File Name: " + pdf_file
                     label1.grid(sticky=NW, padx=15, pady=5, row=8)
                     print(label1["text"])
 
-                    path = root + "\\" + pdf_file
+                    try:
+                        path = root + "/" + pdf_file
 
-                    pdf = PdfFileReader(open(path, 'rb'))
-                    page_count = pdf.getNumPages()
+                        pdf = PdfFileReader(open(path, 'rb'))
+                        page_count = pdf.getNumPages()
 
-                    print("Pages count is: ", page_count)
+                        print("Pages count is: ", page_count)
 
-                    path_list = path.split("/")
-                    pdf_file = path_list[len(path_list) - 1]
+                        if page_count < 150:
 
-                    ocr_path = path.replace(".pdf", "_ocr.pdf")
-                    ocr_txt_path = path.replace(".pdf", "_ocr.txt")
+                            path_list = path.split("/")
+                            pdf_file = path_list[len(path_list) - 1]
 
-                    if " txt" in self.commands:
-                        txt = open(ocr_txt_path, "wb")
-                    else:
-                        txt = None
+                            if ".pdf" in path:
+                                ocr_path = path.replace(".pdf", "_ocr.pdf")
+                                ocr_txt_path = path.replace(".pdf", "_ocr.txt")
+                            else:
+                                ocr_path = path.replace(".PDF", "_ocr.pdf")
+                                ocr_txt_path = path.replace(".PDF", "_ocr.txt")
 
-                    pdf_writer = PdfFileWriter()
+                            if " txt" in self.commands:
+                                txt = open(ocr_txt_path, "wb")
+                            else:
+                                txt = None
 
-                    # Putting "\bin" path in poppler_path helps in locating executable file
-                    pages = convert_from_path(path, 300, poppler_path=poppler_path)
+                            pdf_writer = PdfFileWriter()
 
-                    var.set(0)
-                    count = 1
-                    for page in pages:
+                            # Putting "\bin" path in poppler_path helps in locating executable file
 
-                        jpeg_path = path.replace(".pdf", "_.jpeg")
-                        page.save(jpeg_path, "JPEG")
+                            pages = convert_from_path(path, 300, poppler_path=poppler_path)
 
-                        perform_ocr(path=jpeg_path, command=command)
+                            var.set(0)
+                            count = 1
+                            for page in pages:
 
-                        os.remove(jpeg_path)
+                                if ".pdf" in path:
+                                    jpeg_path = path.replace(".pdf", "_.jpeg")
+                                else:
+                                    jpeg_path = path.replace(".PDF", "_.jpeg")
 
-                        """ PDF File Generation """
-                        if " pdf" in self.commands:
+                                page.save(jpeg_path, "JPEG")
 
-                            pdf_path = jpeg_path.replace(".jpeg", ".pdf")
+                                perform_ocr(path=jpeg_path, command=command)
 
-                            pdf_obj = open(pdf_path, "rb")
-                            pdf_reader = PdfFileReader(pdf_obj)
+                                os.remove(jpeg_path)
 
-                            for page in range(pdf_reader.getNumPages()):
-                                pdf_writer.addPage(pdf_reader.getPage(page))
+                                """ PDF File Generation """
+                                if " pdf" in self.commands:
 
-                            print("Ocr'd " + str(count) + " Page")
+                                    pdf_path = jpeg_path.replace(".jpeg", ".pdf")
 
-                            with open(ocr_path, 'wb') as fh:
-                                pdf_writer.write(fh)
+                                    pdf_obj = open(pdf_path, "rb")
+                                    pdf_reader = PdfFileReader(pdf_obj)
 
-                            pdf_obj.close()
-                            os.remove(pdf_path)
+                                    for page in range(pdf_reader.getNumPages()):
+                                        pdf_writer.addPage(pdf_reader.getPage(page))
 
-                        """ Text File Generation """
-                        if " txt" in self.commands:
-                            txt_path = jpeg_path.replace(".jpeg", ".txt")
-                            txt_obj = open(txt_path, "rb")
+                                    print("Ocr'd " + str(count) + " Page")
 
-                            content = txt_obj.read()
+                                    with open(ocr_path, 'wb') as fh:
+                                        pdf_writer.write(fh)
+
+                                    pdf_obj.close()
+                                    os.remove(pdf_path)
+
+                                """ Text File Generation """
+                                if " txt" in self.commands:
+                                    txt_path = jpeg_path.replace(".jpeg", ".txt")
+                                    txt_obj = open(txt_path, "rb")
+
+                                    content = txt_obj.read()
+                                    if txt is not None:
+                                        txt.write(content)
+
+                                    txt_obj.close()
+                                    os.remove(txt_path)
+
+                                # For calculating the OCR Progress
+                                x = (count / page_count) * 100
+                                percentage = round(x)
+                                var.set(percentage)
+                                # time.sleep(5.0)
+                                count = count + 1
+
                             if txt is not None:
-                                txt.write(content)
+                                txt.close()
+                            print("OCR'd " + pdf_file + " successfully.")
 
-                            txt_obj.close()
-                            os.remove(txt_path)
+                        else:
+                            print ("This is the path: ", path)
+                            split(path, page_num=page_count)
+                            print("PDF has been split into halves.")
 
-                        # For calculating the OCR Progress
-                        x = (count / page_count) * 100
-                        percentage = round(x)
-                        var.set(percentage)
-                        # time.sleep(5.0)
-                        count = count + 1
-
-                    if txt is not None:
-                        txt.close()
-                    print("OCR'd " + pdf_file + " successfully.")
+                    except Exception as e:
+                        if "Document stream is empty" in str(e):
+                            print ("The PDF is unreadable.")
+                        else:
+                            print (e)
 
                     # For file processing progress bar
                     y = (file_process / file_count) * 100

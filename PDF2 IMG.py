@@ -14,21 +14,23 @@ import os
 
 def pdf2img():
     count = 1
-    for root, dir, files in os.walk("C:\\Users\lakshay.saini\Documents\TEST\PDFs", topdown=True):
-        for pdf_file in files:
-            if "Martin Renteria-page299.pdf" in pdf_file:
+    # for root, dir, files in os.walk("C:\\Users\lakshay.saini\Documents\TEST\PDFs", topdown=True):
+    #     for pdf_file in files:
+    #         if "Martin Renteria-page299.pdf" in pdf_file:
 
                 # Putting "\bin" path in poppler_path helps in locating executable file
-                pages = convert_from_path(root + "/" + pdf_file, 300, poppler_path="C:\\Users\lakshay.saini\PycharmProjects\OCR_Conversion_JPEG2PDF\poppler-0.68.0\\bin")
+                # pages = convert_from_path(root + "/" + pdf_file, 300, poppler_path="C:\\Users\lakshay.saini\PycharmProjects\OCR_Conversion_JPEG2PDF\poppler-0.68.0\\bin")
+    pages = convert_from_path("D:\Data\\26 feb Med Legal" + "/" + "Alta Los Angeles Hospitals Inc - Medical Records_172570.PDF", 300,
+                              poppler_path="C:\\Users\lakshay.saini\PycharmProjects\OCR_Conversion_JPEG2PDF\poppler-0.68.0\\bin")
 
-                for page in pages:
+    for page in pages:
 
-                    page.save(root + "/image/" + pdf_file.replace(".pdf", "_" + str(count) + ".jpeg"), "JPEG")
-                    count = count + 1
+        page.save("D:\Data\\26 feb Med Legal" + "/image/" + "Alta Los Angeles Hospitals Inc - Medical Records_172570.PDF".replace(".PDF", "_" + str(count) + ".jpeg"), "JPEG")
+        count = count + 1
 
-                    print ("Converted ") + str(count) + "Page"
+        print ("Converted " + str(count) + "Page")
 
-                print (pdf_file)
+    print ("Alta Los Angeles Hospitals Inc - Medical Records_172570.PDF")
 
 def image_tweak():
     # C:\Users\lakshay.saini\Desktop\Med Legal\PDF\PDF\image
